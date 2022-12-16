@@ -1,5 +1,7 @@
 # StromaDistiller
 
+This data analys pipeline follow the DAP guidelines. The directory structure and the meaing of different files is described in the [DAP documentation](https://github.com/molinerisLab/dap#example-of-directory-tree-created-with-snakemake-template).
+
 ## Configuration
 
 Install [miniconda](https://docs.conda.io/en/latest/miniconda.html).
