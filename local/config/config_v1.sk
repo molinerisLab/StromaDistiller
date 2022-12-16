@@ -1,0 +1,31 @@
+import os
+import warnings
+
+envvars:
+    "TMPDIR"
+
+BIT_REFERENCES_ROOT = os.environ.get("BIT_REFERENCES_ROOT",config["BIT_REFERENCES_ROOT"])
+BIT_PRJ_ROOT = os.environ.get("BIT_PRJ_ROOT",config["BIT_PRJ_ROOT"])
+TMPDIR = os.environ["TMPDIR"]
+GENCODE_DIR = BIT_REFERENCES_ROOT + "/gencode/dataset/" + config['GENCODE_SPECIES'] + "/" + config['GENCODE_VERSION']
+STAR_INDEX_DIR = GENCODE_DIR + "/" + config['GENCODE_GENOME'] + ".star_index/" + config['STAR_VERSION']
+REFERENCE_COUNT_GTF = GENCODE_DIR + "/" + config['GENCODE_ANNOTATION'] + ".gtf"
+#GENCODE_GENOME_FASTA = GENCODE_DIR+"/"+config["GENCODE_GENOME"]+".genome.fa"
+
+if config['SEQENCING_LIBRARY_PAIRED_END']:
+	FEATURECOUNTS_PARAM = "-t exon -g gene_name -s {s} -p -C".format(s=config["SEQENCING_LIBRARY_STRANDED"])
+else:
+	FEATURECOUNTS_PARAM = "-t exon -g gene_name -s {s}".format(s=config["SEQENCING_LIBRARY_STRANDED"])
+
+#######################################
+#
+# SAMPLES definition
+#
+
+SAMPLES=[]
+if os.path.exists("fastq/"):
+	SAMPLES = list(set([f.replace("_R1_001.fastq.gz","").replace("_R2_001.fastq.gz","") for f in os.listdir("fastq/")]))
+
+if not SAMPLES:
+	warnings.warn("No sample found, check the fastq/ directory")
+

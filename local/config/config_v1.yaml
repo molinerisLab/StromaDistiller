@@ -1,0 +1,37 @@
+SEQENCING_LIBRARY_PAIRED_END: False
+SEQENCING_LIBRARY_STRANDED: 0
+# 0 -> unstanded
+# 1 -> forward stranded
+# 2 -> reverse stranded (default for Illumina TruSeq)
+
+BIT_REFERENCES_ROOT: /sto1/ref/bioinfotree/task
+BIT_PRJ_ROOT: ../../
+GENCODE_SPECIES: mmusculus_hsapiens_combined
+GENCODE_VERSION: M29_40
+GENCODE_GENOME: GRCh38_GRCm39.primary_assembly
+
+GENCODE_ANNOTATION: basic.annotation
+#COUNT_REF_GTF?=$(GENCODE_DIR)/$(GENCODE_ANNOTATION).gtf
+#COUNT_REF_GTF_COMP?=$(GENCODE_DIR)/primary_assembly.annotation.gtf
+#COUNT_REF_BED=$(GENCODE_DIR)/$(GENCODE_ANNOTATION).bed
+#RIBOSOMAL_BED_FILE=$(GENCODE_DIR)/primary_assembly.annotation.rRNA_complete.bed
+
+STAR_VERSION: 2.7.8a
+STAR_ADDITIONAL_OUTPUT:
+#--outWigType wiggle --outWigNorm RPM --quantMode TranscriptomeSAM
+
+STAR_MULTIMAP_SCORE_RANGE: 3
+#default = 1
+#xenopipe = 3
+
+STAR_outFilterMultimapNmax: 10
+#deafult 10
+
+STAR_FILTER_MISMATCH: --outFilterMismatchNmax 999 --outFilterMismatchNoverLmax 0.04
+#ENCODE default: 4% of mismatch over the entire alignment allowed
+
+STAR_OUT_SAM_TYPE: --outSAMtype BAM SortedByCoordinate
+STAR_SHARED_MEMORY: LoadAndKeep
+# LoadAndKeep
+# NoSharedMemory
+

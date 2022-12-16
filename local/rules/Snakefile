@@ -1,0 +1,87 @@
+configfile: "config.yaml"
+include: "config.sk"
+
+if os.path.exists("prj_Snakefile"):
+	include: "prj_Snakefile"
+
+def STAR_input_fastq(wildcards):#TODO subistitute with SAMPLES defined in config.sk
+	ret_dict = {'fastq_R1': '{w.fastq_filtering}/{w.sample}_R1_001.fastq.gz'.format(w=wildcards)}
+	if config['SEQENCING_LIBRARY_PAIRED_END']:
+		ret_dict['fastq_R2'] = '{w.fastq_filtering}/{w.sample}_R2_001.fastq.gz'.format(w=wildcards)
+	return(ret_dict)
+
+
+rule all:
+	input: "fastq.featurecounts.H", "fastq.featurecounts.M"
+		
+	
+rule aling:
+	input:
+		unpack(STAR_input_fastq)
+		# %_R1_001.fastq.gz
+	output:
+		bam="STAR/{fastq_filtering}/{sample}/Aligned.sortedByCoord.out.bam"
+	threads: 8
+	params:
+		index = STAR_INDEX_DIR
+	conda:
+	        "STAR_xenopipetet"
+	shell:"""
+		mkdir -p $(dirname {output})
+		STAR \
+			--genomeDir {params.index} \
+			--genomeLoad {config[STAR_SHARED_MEMORY]} \
+			--runThreadN {threads} \
+			--readFilesIn {input} \
+			--readFilesCommand zcat\
+			--outFileNamePrefix $(dirname {output})/ \
+			{config[STAR_OUT_SAM_TYPE]} \
+			--limitBAMsortRAM 10000000000 \
+			--outSAMunmapped Within \
+			--outFilterMultimapNmax {config[STAR_outFilterMultimapNmax]} \
+			--outFilterMultimapScoreRange {config[STAR_MULTIMAP_SCORE_RANGE]} \
+			{config[STAR_FILTER_MISMATCH]} \
+			{config[STAR_ADDITIONAL_OUTPUT]}
+	"""
+
+rule rename_bam:
+	input:
+		"STAR/fastq/{sample}/Aligned.sortedByCoord.out.bam"
+	output:
+		"BAM/{sample}.bam"
+	shell:"""
+		mkdir -p BAM
+		ln {input} {output}	
+	"""
+
+def featurecounts_input(wildcards):
+	#retval=[]
+	for sample in SAMPLES:
+		yield("BAM/{s}.bam".format(s=sample, w=wildcards))
+	#return(retval)
+
+
+rule featurecounts:
+	input: 
+		featurecounts_input
+	output: 
+		counts="{fastq_filtering}.featurecounts",
+		summary="{fastq_filtering}.featurecounts.summary"
+	params: 
+		gtf = REFERENCE_COUNT_GTF,
+		params = FEATURECOUNTS_PARAM,
+		TMPDIR = TMPDIR
+	threads: 12
+	shell:"""
+		featureCounts -o {output.counts} -a {params.gtf} {params.params} --tmpDir {params.TMPDIR} -T {threads} {input}
+	"""
+
+rule featurecounts_H_or_M:
+	input: "{fastq_filtering}.featurecounts"
+	output: "{fastq_filtering}.featurecounts.{species_HM}"
+	shell:"""
+		perl -lane 'BEGIN{{$,="\\t"}} print if $.<=2; if($F[0] =~ s/^{wildcards.species_HM}_//){{ $F[1]=~s/^{wildcards.species_HM}//; $F[1]=~s/;{wildcards.species_HM}/;/g;  print @F}}' {input} > {output}
+	"""
+	#thre are 2 header row in the input file, that are printed without modifications
+	#we remove the starting H_ or M_ on gene names as well as the M or H at the begin of each chr identifier in the second column
+
