@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Standard processing of RNA-seq from illumina NexSeq 500 runs
 
 ## Configuration
@@ -82,3 +83,6 @@ WIP unificarte TMPDIR and TMP_DIR
 ###    [conda environment] removed build indication and added sambamba
 Minor: added the `rename` perl tool
 
+=======
+# StromaDistiller
+>>>>>>> b6085b2a088d15b36bc9b590c0d6e7b99627459a
