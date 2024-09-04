@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/447992571.svg)](https://zenodo.org/doi/10.5281/zenodo.13682493)
+
 # StromaDistiller
 
 This data analys pipeline follow the DAP guidelines. The directory structure and the meaing of different files is described in the [DAP documentation](https://github.com/molinerisLab/dap#example-of-directory-tree-created-with-snakemake-template).
